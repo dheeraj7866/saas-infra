@@ -1,0 +1,31 @@
+name: Build & Deploy SaaS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Build & Push Image
+        run: |
+          docker build -t saas-app .
+          docker tag saas-app:latest 951907775163.dkr.ecr.ap-south-1.amazonaws.com/saas-app:latest
+          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 951907775163.dkr.ecr.ap-south-1.amazonaws.com
+          docker push 951907775163.dkr.ecr.ap-south-1.amazonaws.com/saas-app:latest
+
+      - name: Deploy ECS
+        run: |
+          aws ecs update-service \
+            --cluster saas-cluster \
+            --service saas-service \
+            --force-new-deployment
