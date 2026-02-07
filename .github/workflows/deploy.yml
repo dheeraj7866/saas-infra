@@ -19,7 +19,7 @@ jobs:
 
       - name: Build & Push Image
         run: |
-          docker build -t saas-app .
+          docker build -t saas-app ./app/
           docker tag saas-app:latest 951907775163.dkr.ecr.ap-south-1.amazonaws.com/saas-app:latest
           aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 951907775163.dkr.ecr.ap-south-1.amazonaws.com
           docker push 951907775163.dkr.ecr.ap-south-1.amazonaws.com/saas-app:latest
